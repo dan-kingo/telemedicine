@@ -36,9 +36,9 @@ try {
 
     // Redirect based on role
     if ($user['role'] === 'doctor') {
-        header('Location: ../../doctor/dashboard.html');
+        header('Location: ../../frontend/doctor/dashboard.html');
     } else {
-        header('Location: ../../patient/dashboard.html');
+        header('Location: ../../frontend/patient/dashboard.html');
     }
     exit;
 } catch (PDOException $e) {

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Dashboard - Telemedicine</title>
+  <link rel="stylesheet" href="../../frontend/assets/css/style.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-color: #f4f8fc;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar {
+      background-color: #fff;
+      width: 220px;
+      padding: 1.5rem 1rem;
+      border-right: 1px solid #ddd;
+      height: calc(100vh - 65px);
+      position: fixed;
+      top: 75px;
+      left: 0;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.5rem;
+      text-decoration: none;
+      color: #333;
+      border-radius: 5px;
+    }
+
+    .sidebar a:hover {
+      background-color: #eaf4ff;
+      color: #007bff;
+    }
+
+    .main-content {
+      margin-left: 240px;
+      padding: 2rem;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #ccc;
+      }
+
+      .main-content {
+        margin: 0;
+        padding: 1rem;
+      }
+    }
+
+    .logout-btn {
+      background: #ff4d4d;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .logout-btn:hover {
+      background: #cc0000;
+    }
+  </style>
+</head>
+ <header>
+    <h1>Doctor Dashboard</h1>
+    <form action="../../backend/auth/logout.php" method="POST">
+      <button class="logout-btn" type="submit">Logout</button>
+    </form>
+  </header>
+
+  <div class="sidebar">
+    <a href="#">Dashboard Overview</a>
+    <a href="#">Appointments</a>
+    <a href="#">Patients</a>
+    <a href="#">History</a>
+    <a href="#">Prescriptions</a>
+  </div>
+
+  <div class="main-content">
+    <div class="card" id="welcome-section">
+      <h2>Welcome, Doctor!</h2>
+      <p>Here's a quick overview of your activity.</p>
+    </div>
+
+    <div class="card" id="appointments-section">
+      <h3>Today's Appointments</h3>
+      <ul id="appointments-list">
+        <li>Loading...</li>
+      </ul>
+    </div>
+
+    <div class="card" id="patients-section">
+      <h3>Recent Patients</h3>
+      <ul id="patients-list">
+        <li>Loading...</li>
+      </ul>
+    </div>
+
+    <div class="card" id="summary-section">
+      <h3>This Month's Summary</h3>
+      <p id="summary-data">Loading...</p>
+    </div>
+  </div>
+
+  <script>
+    async function loadDashboardData() {
+      try {
+        const res = await fetch('../../backend/utils/get_dashboard_data.php');
+        const data = await res.json();
+
+        if (data.error) {
+          document.getElementById('welcome-section').innerHTML = `<h2>Error</h2><p>${data.error}</p>`;
+          return;
+        }
+
+        // Welcome message
+        document.getElementById('welcome-section').innerHTML = `
+          <h2>Welcome, Dr. ${data.doctor_name}!</h2>
+          <p>Here's a quick overview of your activity.</p>
+        `;
+
+        // Appointments
+        const appointmentsList = document.getElementById('appointments-list');
+        appointmentsList.innerHTML = '';
+        if (data.appointments_today.length === 0) {
+          appointmentsList.innerHTML = '<li>No appointments today.</li>';
+        } else {
+          data.appointments_today.forEach(app => {
+            appointmentsList.innerHTML += `<li>${app.time} - ${app.patient_name}</li>`;
+          });
+        }
+
+        // Recent Patients
+        const patientsList = document.getElementById('patients-list');
+        patientsList.innerHTML = '';
+        if (data.recent_patients.length === 0) {
+          patientsList.innerHTML = '<li>No recent patients.</li>';
+        } else {
+          data.recent_patients.forEach(p => {
+            patientsList.innerHTML += `<li>${p.patient_name}</li>`;
+          });
+        }
+
+        // Summary
+        document.getElementById('summary-data').innerHTML = `
+          Total Patients This Month: <strong>${data.total_patients_this_month}</strong><br/>
+          Total Prescriptions Written: <strong>${data.total_prescriptions_this_month}</strong>
+        `;
+
+      } catch (err) {
+        document.getElementById('welcome-section').innerHTML = `<h2>Error</h2><p>Failed to load dashboard data.</p>`;
+        console.error(err);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadDashboardData);
+  </script>
+
+</body>
+
+</html>
