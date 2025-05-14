@@ -34,10 +34,10 @@ try {
         exit;
     }
 
-    // Store user session data
+    // Store user session data including role
     session_start();
     $_SESSION['user_id'] = $user['id'];
-    $_SESSION['role'] = $user['role'];
+    $_SESSION['role'] = $user['role'];  // Store the role (doctor/patient)
 
     // Login successful
     echo json_encode([
