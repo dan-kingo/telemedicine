@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Telemedicine</title>
+    <link rel="stylesheet" href="frontend/assets/css/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: #eaf4ff;
+      }
+
+      .register-container {
+        max-width: 500px;
+        margin: 4rem auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .register-container h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .register-container label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+      }
+
+      .register-container input,
+      .register-container select {
+        width: 100%;
+        padding: 0.7rem;
+        margin-bottom: 1.2rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+
+      .register-container button {
+        width: 100%;
+        padding: 0.8rem;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .register-container button:hover {
+        background-color: #0056b3;
+      }
+
+      .register-container .link {
+        margin-top: 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 600px) {
+        .register-container {
+          margin: 2rem 1rem;
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="register-container">
+      <h2>Create an Account</h2>
+      <form action="backend/auth/register.php" method="POST">
+        <!-- ✅ Role Selection -->
+        <select name="role" id="role" required>
+          <option value="">-- Select Role --</option>
+          <option value="patient">patient</option>
+          <option value="doctor">doctor</option>
+        </select>
+
+        <label for="name">Full Name</label>
+        <input type="text" name="full_name" id="name" required />
+
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" required />
+
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required />
+
+        <label for="confirm_password">Confirm Password</label>
+        <input
+          type="password"
+          name="confirm_password"
+          id="confirm_password"
+          required
+        />
+
+        <button type="submit">Register</button>
+      </form>
+      <div class="link">
+        Already have an account? <a href="login.html">Login here</a>
+      </div>
+    </div>
+  </body>
+</html>
