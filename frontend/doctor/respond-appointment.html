@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doctor Appointments</title>
+    <link rel="stylesheet" href="../../frontend/assets/css/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: #f4f8fc;
+      }
+      header {
+        background-color: #007bff;
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .sidebar {
+        background-color: #fff;
+        width: 220px;
+        padding: 1.5rem 1rem;
+        border-right: 1px solid #ddd;
+        height: calc(100vh - 65px);
+        position: fixed;
+        top: 75px;
+        left: 0;
+      }
+      .sidebar a {
+        display: block;
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        color: #333;
+        border-radius: 5px;
+      }
+      .sidebar a:hover {
+        background-color: #eaf4ff;
+        color: #007bff;
+      }
+      .main-content {
+        margin-left: 240px;
+        padding: 2rem;
+      }
+      .card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+      }
+      .appointment {
+        border-bottom: 1px solid #eee;
+        padding: 1rem 0;
+      }
+      .appointment:last-child {
+        border-bottom: none;
+      }
+      .appointment h4 {
+        margin: 0 0 0.3rem;
+      }
+      .actions button {
+        margin-right: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .accept {
+        background: #28a745;
+        color: white;
+      }
+      .reject {
+        background: #dc3545;
+        color: white;
+      }
+      .complete {
+        background: #17a2b8;
+        color: white;
+      }
+      .view-history {
+        background: #6f42c1;
+        color: white;
+      }
+
+      .logout-btn {
+        background: #ff4d4d;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          position: relative;
+          width: 100%;
+          height: auto;
+          border-bottom: 1px solid #ccc;
+        }
+        .main-content {
+          margin-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Doctor Appointments</h1>
+      <form action="../../backend/auth/logout.php" method="POST">
+        <button class="logout-btn" type="submit">Logout</button>
+      </form>
+    </header>
+
+    <div class="sidebar">
+      <a href="dashboard.html">Dashboard Overview</a>
+      <a href="respond-appointment.html">Appointments</a>
+      <a href="prescriptions.html">Prescriptions</a>
+      <a href="view-history.html">History</a>
+    </div>
+
+    <div class="main-content">
+      <div class="card">
+        <h2>Appointments</h2>
+        <div id="appointments-container">Loading appointments...</div>
+      </div>
+    </div>
+
+    <script>
+      async function fetchAppointments() {
+        const container = document.getElementById("appointments-container");
+        try {
+          const res = await fetch("../../backend/history/view.php");
+          const data = await res.json();
+
+          if (Array.isArray(data) && data.length > 0) {
+            container.innerHTML = "";
+            data.forEach((app) => {
+              const div = document.createElement("div");
+              div.className = "appointment";
+              div.innerHTML = `
+              <h4>${app.patient_name} — ${app.date} @ ${app.time}</h4>
+              <p>Status: <strong>${app.status}</strong></p>
+              <div class="actions">
+                <button class="accept" onclick="respond(${app.id}, 'accepted')">Accept</button>
+                <button class="reject" onclick="respond(${app.id}, 'rejected')">Reject</button>
+                <button class="complete" onclick="respond(${app.id}, 'completed')">Complete</button>
+                <button class="view-history" onclick="window.open('../../backend/history/view.php?patient_id=${app.patient_id}', '_blank')">View History</button>
+              </div>
+            `;
+              container.appendChild(div);
+            });
+          } else {
+            container.innerHTML = "<p>No appointments found.</p>";
+          }
+        } catch (err) {
+          console.error(err);
+          container.innerHTML = "<p>Error loading appointments.</p>";
+        }
+      }
+
+      async function respond(appointmentId, status) {
+        try {
+          const res = await fetch("../../backend/appointments/respond.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ appointment_id: appointmentId, status }),
+          });
+          const result = await res.json();
+          if (res.ok) {
+            alert(result.message);
+            fetchAppointments(); // refresh
+          } else {
+            alert(result.error || "Failed to update.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Server error.");
+        }
+      }
+
+      fetchAppointments();
+    </script>
+  </body>
+</html>
