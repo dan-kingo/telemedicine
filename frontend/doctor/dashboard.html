@@ -158,7 +158,16 @@
           appointmentsList.innerHTML = '<li>No appointments today.</li>';
         } else {
           data.appointments_today.forEach(app => {
-            appointmentsList.innerHTML += `<li>${app.time} - ${app.patient_name}</li>`;
+            function formatTime(timeString) {
+  const [hour, minute] = timeString.split(':');
+  const hourNum = parseInt(hour);
+  const ampm = hourNum >= 12 ? 'PM' : 'AM';
+  const hour12 = hourNum % 12 === 0 ? 12 : hourNum % 12;
+  return `${hour12}:${minute} ${ampm}`;
+            }
+// Usage
+appointmentsList.innerHTML += `<li>${formatTime(app.appointment_time)} - ${app.patient_name}</li>`;
+
           });
         }
 

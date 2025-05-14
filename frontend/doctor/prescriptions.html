@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prescriptions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+    h1 {
+      text-align: center;
+    }
+    #download-btn {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 0;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #dee2e6;
+    }
+    th {
+      background-color: #343a40;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Prescriptions</h1>
+<button id="download-btn">Download PDF</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Appointment</th>
+      <th>Doctor</th>
+      <th>Patient</th>
+      <th>Notes</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody id="prescriptions-table-body"></tbody>
+</table>
+
+<script>
+  const getQueryParam = (key) => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(key);
+  };
+
+  const appointmentId = getQueryParam('appointment_id');
+  const API_URL = '/backend/prescriptions/view.php' + (appointmentId ? '?appointment_id=' + appointmentId : '');
+
+  async function fetchPrescriptions() {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || 'Failed to load prescriptions');
+        return;
+      }
+
+      const tbody = document.getElementById('prescriptions-table-body');
+      tbody.innerHTML = '';
+
+      data.forEach(p => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${p.id}</td>
+          <td>${p.appointment_id}</td>
+          <td>${p.doctor_name}</td>
+          <td>${p.patient_name}</td>
+          <td>${p.prescription_text}</td>
+          <td>${new Date(p.created_at).toLocaleString()}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Error loading data');
+    }
+  }
+
+  document.getElementById('download-btn').addEventListener('click', () => {
+    const url = `/backend/prescriptions/view.php?download=1` + (appointmentId ? `&appointment_id=${appointmentId}` : '');
+    window.open(url, '_blank');
+  });
+
+  fetchPrescriptions();
+</script>
+
+</body>
+</html>

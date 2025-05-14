@@ -22,15 +22,29 @@ try {
     $doctor = $stmt->fetch(PDO::FETCH_ASSOC);
     $doctorName = $doctor ? $doctor['full_name'] : 'Doctor';
 
-    // Fetch today's appointments
-    $stmt = $conn->prepare("SELECT patient_id, appointment_time FROM appointments WHERE doctor_id = ? AND appointment_date = ? ORDER BY appointment_time ASC");
-    $stmt->execute([$doctorId, $today]);
-    $appointmentsToday = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch today's appointments WITH patient name
+$stmt = $conn->prepare("
+  SELECT u.full_name AS patient_name, a.appointment_time 
+  FROM appointments a 
+  JOIN users u ON a.patient_id = u.id 
+  WHERE a.doctor_id = ? AND a.appointment_date = ? 
+  ORDER BY a.appointment_time ASC
+");
+$stmt->execute([$doctorId, $today]);
+$appointmentsToday = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Fetch 3 most recent patients
-    $stmt = $conn->prepare("SELECT DISTINCT patient_id FROM appointments WHERE doctor_id = ? ORDER BY appointment_date DESC LIMIT 3");
-    $stmt->execute([$doctorId]);
-    $recentPatients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch 3 most recent patients WITH name
+$stmt = $conn->prepare("
+  SELECT DISTINCT u.full_name AS patient_name 
+  FROM appointments a 
+  JOIN users u ON a.patient_id = u.id 
+  WHERE a.doctor_id = ? 
+  ORDER BY a.appointment_date DESC 
+  LIMIT 3
+");
+$stmt->execute([$doctorId]);
+$recentPatients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
     // Count of unique patients this month
     $stmt = $conn->prepare("SELECT COUNT(DISTINCT patient_id) AS total_patients FROM appointments WHERE doctor_id = ? AND appointment_date >= ?");
