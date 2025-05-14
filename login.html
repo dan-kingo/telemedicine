@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Telemedicine</title>
+    <link rel="stylesheet" href="frontend/assets/css/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: #eaf4ff;
+      }
+
+      .login-container {
+        max-width: 500px;
+        margin: 4rem auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .login-container h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .login-container label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-weight: 500;
+      }
+
+      .login-container input {
+        width: 100%;
+        padding: 0.7rem;
+        margin-bottom: 1.2rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+
+      .login-container button {
+        width: 100%;
+        padding: 0.8rem;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .login-container button:hover {
+        background-color: #0c71de;
+      }
+
+      .login-container .link {
+        margin-top: 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 600px) {
+        .login-container {
+          margin: 2rem 1rem;
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>Login</h2>
+      <form action="backend/auth/login.php" method="POST">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" required />
+
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required />
+
+        <button type="submit">Login</button>
+      </form>
+      <div class="link">
+        Don't have an account? <a href="register.html">Register here</a>
+      </div>
+    </div>
+  </body>
+</html>
