@@ -47,14 +47,15 @@ try {
     $base_url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/uploads/history/';
 
     $files = array_map(function ($row) use ($base_url) {
-        return [
-            'id' => $row['id'],
-            'file_name' => $row['file_name'],
-            'description' => $row['description'],
-            'uploaded_at' => $row['uploaded_at'],
-            'download_url' => $base_url . basename($row['file_path'])
-        ];
-    }, $results);
+    return [
+        'id' => $row['id'],
+        'file_name' => $row['file_name'],
+        'description' => $row['description'],
+        'uploaded_at' => $row['uploaded_at'],
+        'download_url' => $base_url . rawurlencode(basename($row['file_path']))
+    ];
+}, $results);
+
 
     echo json_encode($files);
 

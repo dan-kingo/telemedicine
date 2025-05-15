@@ -143,15 +143,24 @@
             data.forEach((app) => {
               const div = document.createElement("div");
               div.className = "appointment";
-              div.innerHTML = `
-              <h4>${app.patient_name} — ${app.date} @ ${app.time}</h4>
-              <p>Status: <strong>${app.status}</strong></p>
-              <div class="actions">
-                <button class="accept" onclick="respond(${app.id}, 'accepted')">Accept</button>
-                <button class="reject" onclick="respond(${app.id}, 'rejected')">Reject</button>
-                <button class="complete" onclick="respond(${app.id}, 'completed')">Complete</button>
-              </div>
-            `;
+             let buttonsHTML = "";
+
+if (app.status !== "completed") {
+  if (app.status !== "confirmed") {
+    buttonsHTML += `<button class="accept" onclick="respond(${app.id}, 'confirmed')">Accept</button>`;
+  }
+  if (app.status !== "cancelled") {
+    buttonsHTML += `<button class="reject" onclick="respond(${app.id}, 'cancelled')">Reject</button>`;
+  }
+  buttonsHTML += `<button class="complete" onclick="respond(${app.id}, 'completed')">Complete</button>`;
+}
+
+div.innerHTML = `
+  <h4>${app.patient_name} — ${app.date} @ ${app.time}</h4>
+  <p>Status: <strong>${app.status}</strong></p>
+  <div class="actions">${buttonsHTML}</div>
+`;
+
               container.appendChild(div);
             });
           } else {
