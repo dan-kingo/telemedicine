@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <link rel="stylesheet" href="../../frontend/assets/css/style.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f4f8fc;
+        }
+
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar {
+            background-color: #fff;
+            width: 220px;
+            padding: 1.5rem 1rem;
+            border-right: 1px solid #ddd;
+            height: calc(100vh - 65px);
+            position: fixed;
+            top: 75px;
+            left: 0;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            text-decoration: none;
+            color: #333;
+            border-radius: 5px;
+        }
+
+        .sidebar a:hover {
+            background-color: #eaf4ff;
+            color: #007bff;
+        }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .logout-btn {
+            background: #ff4d4d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background: #cc0000;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Patient Dashboard</h1>
+        <form action="../../backend/auth/logout.php" method="POST">
+            <button class="logout-btn" type="submit">Logout</button>
+        </form>
+    </header>
+
+    <div class="sidebar">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="schedule-appointment.html">Schedule Appointment</a>
+        <a href="medical-history.html">Medical History</a>
+        <a href="prescriptions.html">Prescriptions</a>
+    </div>
+
+    <div class="main-content">
+        <div class="card" id="upcoming-appointments">
+            <h2>Upcoming Appointments</h2>
+            <div id="appointments-list">Loading...</div>
+        </div>
+
+        <div class="card" id="recent-prescriptions">
+            <h2>Recent Prescriptions</h2>
+            <div id="prescriptions-list">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboardData() {
+            try {
+                // Load appointments
+                const appointmentsRes = await fetch('../../backend/appointments/list.php');
+                const appointments = await appointmentsRes.json();
+                
+                const appointmentsList = document.getElementById('appointments-list');
+                if (appointments.length === 0) {
+                    appointmentsList.innerHTML = '<p>No upcoming appointments</p>';
+                } else {
+                    appointmentsList.innerHTML = appointments.map(app => `
+                        <div>
+                            <p>Date: ${app.date}</p>
+                            <p>Time: ${app.time}</p>
+                            <p>Status: ${app.status}</p>
+                        </div>
+                    `).join('');
+                }
+
+                // Load prescriptions
+                const prescriptionsRes = await fetch('../../backend/prescriptions/index.php');
+                const prescriptions = await prescriptionsRes.json();
+                
+                const prescriptionsList = document.getElementById('prescriptions-list');
+                if (prescriptions.length === 0) {
+                    prescriptionsList.innerHTML = '<p>No recent prescriptions</p>';
+                } else {
+                    prescriptionsList.innerHTML = prescriptions.map(prescription => `
+                        <div>
+                            <p>Date: ${new Date(prescription.created_at).toLocaleDateString()}</p>
+                            <p>Doctor: ${prescription.doctor_name}</p>
+                            <p>Prescription: ${prescription.prescription_text}</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        window.addEventListener('load', loadDashboardData);
+    </script>
+</body>
+</html>

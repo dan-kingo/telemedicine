@@ -4,9 +4,11 @@
 require_once '../config/db.php';
 session_start();
 
+header('Content-Type: application/json');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo "Only POST method is allowed";
+    echo json_encode(['error' => 'Only POST method is allowed']);
     exit;
 }
 
@@ -15,7 +17,7 @@ $password = trim($_POST['password'] ?? '');
 
 if (!$email || !$password) {
     http_response_code(400);
-    echo "Email and password are required.";
+    echo json_encode(['error' => 'Email and password are required.']);
     exit;
 }
 
@@ -26,7 +28,7 @@ try {
 
     if (!$user || !password_verify($password, $user['password'])) {
         http_response_code(401);
-        echo "Invalid email or password.";
+        echo json_encode(['error' => 'Invalid email or password.']);
         exit;
     }
 
@@ -34,15 +36,18 @@ try {
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['role'] = $user['role'];
 
-    // Redirect based on role
-    if ($user['role'] === 'doctor') {
-        header('Location: ../../frontend/doctor/dashboard.html');
-    } else {
-        header('Location: ../../frontend/patient/dashboard.html');
-    }
-    exit;
+    // Return success with redirect URL
+    $redirectUrl = $user['role'] === 'doctor' 
+        ? '/frontend/doctor/dashboard.html'
+        : '/frontend/patient/dashboard.html';
+    
+    echo json_encode([
+        'success' => true,
+        'redirect' => $redirectUrl
+    ]);
+    
 } catch (PDOException $e) {
     http_response_code(500);
-    echo "Server error: " . $e->getMessage();
+    echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
 }
 ?>

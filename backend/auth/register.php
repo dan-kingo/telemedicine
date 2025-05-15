@@ -16,9 +16,22 @@ $email = trim($_POST['email'] ?? '');
 $password = trim($_POST['password'] ?? '');
 $role = trim($_POST['role'] ?? '');
 
+// Validation
 if (!$fullName || !$email || !$password || !in_array($role, ['patient', 'doctor'])) {
     http_response_code(400);
     echo json_encode(['error' => 'All fields are required and role must be patient or doctor.']);
+    exit;
+}
+
+if (strlen($password) < 6) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Password must be at least 6 characters long.']);
+    exit;
+}
+
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Invalid email format.']);
     exit;
 }
 
@@ -37,9 +50,7 @@ try {
     $stmt = $conn->prepare("INSERT INTO users (full_name, email, password, role) VALUES (?, ?, ?, ?)");
     $stmt->execute([$fullName, $email, $hashedPassword, $role]);
 
-    // After successful insert:
-header('Location: ../../login.html');
-exit;
+    echo json_encode(['success' => true, 'message' => 'Registration successful']);
 } catch (PDOException $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Server error: ' . $e->getMessage()]);
