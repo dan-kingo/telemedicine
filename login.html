@@ -61,6 +61,16 @@
         font-size: 0.9rem;
       }
 
+      .error-message {
+        color: #dc3545;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+        display: none;
+      }
+
       @media (max-width: 600px) {
         .login-container {
           margin: 2rem 1rem;
@@ -72,7 +82,8 @@
   <body>
     <div class="login-container">
       <h2>Login</h2>
-      <form action="backend/auth/login.php" method="POST">
+      <div id="error-message" class="error-message"></div>
+      <form id="login-form">
         <label for="email">Email</label>
         <input type="email" name="email" id="email" required />
 
@@ -85,5 +96,37 @@
         Don't have an account? <a href="register.html">Register here</a>
       </div>
     </div>
+
+    <script>
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const errorMessage = document.getElementById("error-message");
+          const formData = new FormData(e.target);
+
+          try {
+            const response = await fetch("backend/auth/login.php", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              window.location.href = data.redirect;
+            } else {
+              errorMessage.style.display = "block";
+              errorMessage.textContent =
+                data.error || "Login failed. Please try again.";
+            }
+          } catch (error) {
+            errorMessage.style.display = "block";
+            error;
+            Message.textContent = "An error occurred. Please try again later.";
+            console.error("Error:", error);
+          }
+        });
+    </script>
   </body>
 </html>
