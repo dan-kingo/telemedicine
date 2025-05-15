@@ -1,112 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Prescriptions</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f8f9fa;
-    }
-    h1 {
-      text-align: center;
-    }
-    #download-btn {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin: 10px 0;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #dee2e6;
-    }
-    th {
-      background-color: #343a40;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background-color: #f1f1f1;
-    }
-  </style>
-</head>
-<body>
-
-<h1>Prescriptions</h1>
-<button id="download-btn">Download PDF</button>
-
-<table>
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Appointment</th>
-      <th>Doctor</th>
-      <th>Patient</th>
-      <th>Notes</th>
-      <th>Date</th>
-    </tr>
-  </thead>
-  <tbody id="prescriptions-table-body"></tbody>
-</table>
-
-<script>
-  const getQueryParam = (key) => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(key);
-  };
-
-  const appointmentId = getQueryParam('appointment_id');
-  const API_URL = '/backend/prescriptions/view.php' + (appointmentId ? '?appointment_id=' + appointmentId : '');
-
-  async function fetchPrescriptions() {
-    try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.error || 'Failed to load prescriptions');
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <title>Doctor Prescriptions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../frontend/assets/css/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: #f4f8fc;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
       }
 
-      const tbody = document.getElementById('prescriptions-table-body');
-      tbody.innerHTML = '';
+      header {
+        background-color: #007bff;
+        color: white;
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 75px; /* Add this line for consistent header height */
+      }
 
-      data.forEach(p => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${p.id}</td>
-          <td>${p.appointment_id}</td>
-          <td>${p.doctor_name}</td>
-          <td>${p.patient_name}</td>
-          <td>${p.prescription_text}</td>
-          <td>${new Date(p.created_at).toLocaleString()}</td>
-        `;
-        tbody.appendChild(row);
-      });
+      header h1 {
+        margin: 0; /* Remove default margin */
+      }
 
-    } catch (err) {
-      console.error('Error:', err);
-      alert('Error loading data');
-    }
-  }
+      .sidebar {
+        background-color: #fff;
+        width: 220px;
+        padding: 1.5rem 1rem;
+        border-right: 1px solid #ddd;
+        height: calc(100vh - 65px);
+        position: fixed;
+        top: 75px;
+        left: 0;
+      }
 
-  document.getElementById('download-btn').addEventListener('click', () => {
-    const url = `/backend/prescriptions/view.php?download=1` + (appointmentId ? `&appointment_id=${appointmentId}` : '');
-    window.open(url, '_blank');
-  });
+      .sidebar a {
+        display: block;
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        color: #333;
+        border-radius: 5px;
+      }
 
-  fetchPrescriptions();
-</script>
+      .sidebar a:hover {
+        background-color: #eaf4ff;
+        color: #007bff;
+      }
 
-</body>
+      .main-content {
+        margin-left: 240px;
+        padding: 2rem;
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+
+      .logout-btn {
+        background: #ff4d4d;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .logout-btn:hover {
+        background: #cc0000;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 80px;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        resize: vertical;
+      }
+
+      button {
+        margin-top: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      button:disabled {
+        background-color: #aaa;
+      }
+
+      .success {
+        color: green;
+        font-weight: bold;
+        margin-top: 0.5rem;
+      }
+
+      .error {
+        color: red;
+        font-weight: bold;
+        margin-top: 0.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          position: relative;
+          width: 100%;
+          height: auto;
+          border-right: none;
+          border-bottom: 1px solid #ccc;
+        }
+
+        .main-content {
+          margin: 0;
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Doctor Prescriptions</h1>
+      <form action="../../backend/auth/logout.php" method="POST">
+        <button class="logout-btn" type="submit">Logout</button>
+      </form>
+    </header>
+
+    <div class="sidebar">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="respond-appointment.html">Appointments</a>
+      <a href="prescriptions.html">Prescriptions</a>
+      <a href="view-history.html">History</a>
+    </div>
+
+    <div class="main-content">
+      <div id="prescription-list"></div>
+    </div>
+
+    <script>
+      const container = document.getElementById("prescription-list");
+
+      async function fetchAppointments() {
+        const res = await fetch("../../backend/appointments/list.php");
+        return await res.json();
+      }
+
+      async function fetchPrescriptions() {
+        const res = await fetch("../../backend/prescriptions/index.php");
+        return await res.json();
+      }
+
+      function renderCard(appointment, existingPrescription = null) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+        <h3>Patient: ${appointment.patient_name}</h3>
+        <p>Date: ${appointment.date}</p>
+        <p>Time: ${appointment.time}</p>
+        <p>Status: ${appointment.status}</p>
+        <label for="prescription-${appointment.id}">Prescription:</label>
+        <textarea id="prescription-${appointment.id}">${
+          existingPrescription?.prescription_text || ""
+        }</textarea>
+        <button onclick="submitPrescription(${
+          appointment.id
+        }, this)">Save Prescription</button>
+        <div id="status-${appointment.id}"></div>
+      `;
+
+        container.appendChild(card);
+      }
+
+      async function renderPage() {
+        const [appointments, prescriptions] = await Promise.all([
+          fetchAppointments(),
+          fetchPrescriptions(),
+        ]);
+
+        if (!appointments.length) {
+          container.innerHTML = "<p>No appointments found.</p>";
+          return;
+        }
+
+        appointments.forEach((app) => {
+          const prescription = prescriptions.find(
+            (p) => p.appointment_id == app.id
+          );
+          renderCard(app, prescription);
+        });
+      }
+
+      async function submitPrescription(appointmentId, button) {
+        const textarea = document.getElementById(
+          `prescription-${appointmentId}`
+        );
+        const status = document.getElementById(`status-${appointmentId}`);
+        const text = textarea.value.trim();
+
+        if (!text) {
+          status.innerHTML = `<p class="error">Prescription text required.</p>`;
+          return;
+        }
+
+        button.disabled = true;
+        status.textContent = "Saving...";
+
+        try {
+          const res = await fetch("../../backend/prescriptions/create.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              appointment_id: appointmentId,
+              prescription_text: text,
+            }),
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            status.innerHTML = `<p class="success">${data.message}</p>`;
+          } else {
+            status.innerHTML = `<p class="error">${data.error}</p>`;
+          }
+        } catch (err) {
+          status.innerHTML = `<p class="error">Failed to submit prescription.</p>`;
+        }
+
+        button.disabled = false;
+      }
+
+      renderPage();
+    </script>
+  </body>
 </html>
