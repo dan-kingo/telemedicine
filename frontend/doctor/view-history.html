@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>View Medical History</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: #f4f8fc;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      header {
+        background-color: #007bff;
+        color: white;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sidebar {
+        background-color: #fff;
+        width: 220px;
+        padding: 1.5rem 1rem;
+        border-right: 1px solid #ddd;
+        height: calc(100vh - 65px);
+        position: fixed;
+        top: 75px;
+        left: 0;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        color: #333;
+        border-radius: 5px;
+      }
+
+      .sidebar a:hover {
+        background-color: #eaf4ff;
+        color: #007bff;
+      }
+
+      .main-content {
+        margin-left: 240px;
+        padding: 2rem;
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+
+      .card {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+      }
+
+      button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .file-list {
+        margin-top: 1rem;
+        padding-left: 1rem;
+      }
+
+      .file-item {
+        margin-bottom: 0.5rem;
+      }
+ .logout-btn {
+        background: #ff4d4d;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          position: relative;
+          width: 100%;
+          height: auto;
+          border-right: none;
+          border-bottom: 1px solid #ccc;
+        }
+
+        .main-content {
+          margin: 0;
+          padding: 1rem;
+        }
+        .last-child {
+          margin-bottom: 12;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Patient Medical History</h1>
+      <form action="../../backend/auth/logout.php" method="POST">
+        <button class="logout-btn" type="submit">Logout</button>
+      </form>
+    </header>
+
+    <div class="sidebar">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="respond-appointment.html">Appointments</a>
+      <a href="prescriptions.html">Prescriptions</a>
+      <a href="view-history.html">History</a>
+    </div>
+
+    <div class="main-content" id="main-content">
+      <p>Loading appointments...</p>
+    </div>
+
+    <script>
+      const mainContent = document.getElementById("main-content");
+
+      async function fetchAppointments() {
+        const res = await fetch("../../backend/appointments/list.php");
+        return await res.json();
+      }
+
+      async function fetchHistory(patientId) {
+        const res = await fetch(
+          `../../backend/history/view.php?patient_id=${patientId}`
+        );
+        return await res.json();
+      }
+
+      async function renderAppointments() {
+        const appointments = await fetchAppointments();
+
+        if (!appointments.length) {
+          mainContent.innerHTML = "<p>No appointments found.</p>";
+          return;
+        }
+
+        mainContent.innerHTML = "";
+        appointments.forEach((appointment) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+          <h3>${appointment.patient_name}</h3>
+          <p>Date: ${appointment.date}</p>
+          <p>Time: ${appointment.time}</p>
+          <p class="last-child">Status: ${appointment.status}</p>
+          <button onclick="viewHistory(${appointment.patient_id}, this)" style="margin-top:0.5em">View History</button>
+          <div class="file-list" id="files-${appointment.patient_id}"></div>
+        `;
+          mainContent.appendChild(card);
+        });
+      }
+
+      async function viewHistory(patientId, button) {
+        const container = document.getElementById(`files-${patientId}`);
+        container.innerHTML = "<p>Loading history...</p>";
+
+        try {
+          const history = await fetchHistory(patientId);
+          if (!history.length) {
+            container.innerHTML = "<p>No medical history found.</p>";
+            return;
+          }
+
+          container.innerHTML = history
+            .map(
+              (file) => `
+          <div class="file-item">
+            <p><strong>${file.file_name}</strong></p>
+            <p>Description: ${file.description || "No description"}</p>
+            <p>Uploaded at: ${new Date(file.uploaded_at).toLocaleString()}</p>
+            <a href="${file.download_url}" target="_blank">Download</a>
+          </div>
+        `
+            )
+            .join("");
+        } catch (err) {
+          container.innerHTML = "<p>Error loading history.</p>";
+        }
+      }
+
+      renderAppointments();
+    </script>
+  </body>
+</html>
