@@ -22,6 +22,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        z-index: 1000;
       }
 
       .sidebar {
@@ -33,6 +34,7 @@
         position: fixed;
         top: 75px;
         left: 0;
+        overflow-y: auto;
       }
 
       .sidebar a {
@@ -42,6 +44,7 @@
         text-decoration: none;
         color: #333;
         border-radius: 5px;
+        transition: background-color 0.3s, color 0.3s;
       }
 
       .sidebar a:hover {
@@ -63,6 +66,37 @@
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
       }
 
+      .appointment-item,
+      .prescription-item {
+        padding: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-top: 1rem;
+        background-color: #f9fbff;
+        box-shadow: 0 1px 3px rgba(0, 123, 255, 0.1);
+        transition: box-shadow 0.3s ease;
+      }
+
+      .appointment-item:hover,
+      .prescription-item:hover {
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+      }
+
+      .appointment-item p,
+      .prescription-item p {
+        margin: 0.2rem 0;
+        color: #333;
+        font-size: 0.95rem;
+      }
+
+      .appointment-header,
+      .prescription-header {
+        font-weight: 600;
+        color: #007bff;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+      }
+
       .logout-btn {
         background: #ff4d4d;
         color: white;
@@ -71,6 +105,7 @@
         border-radius: 6px;
         cursor: pointer;
         font-weight: bold;
+        transition: background-color 0.3s ease;
       }
 
       .logout-btn:hover {
@@ -136,12 +171,17 @@
             appointmentsList.innerHTML = appointments
               .map(
                 (app) => `
-                        <div>
-                            <p>Date: ${app.date}</p>
-                            <p>Time: ${app.time}</p>
-                            <p>Status: ${app.status}</p>
-                        </div>
-                    `
+                  <div class="appointment-item">
+                    <p class="appointment-header">Appointment with Dr. ${
+                      app.doctor_name
+                    }</p>
+                    <p><strong>Date:</strong> ${new Date(
+                      app.date
+                    ).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> ${app.time}</p>
+                    <p><strong>Status:</strong> ${app.status}</p>
+                  </div>
+                `
               )
               .join("");
           }
@@ -160,21 +200,27 @@
             prescriptionsList.innerHTML = prescriptions
               .map(
                 (prescription) => `
-                        <div>
-                            <p>Date: ${new Date(
-                              prescription.created_at
-                            ).toLocaleDateString()}</p>
-                            <p>Doctor: ${prescription.doctor_name}</p>
-                            <p>Prescription: ${
-                              prescription.prescription_text
-                            }</p>
-                        </div>
-                    `
+                  <div class="prescription-item">
+                    <p class="prescription-header">Prescription from Dr. ${
+                      prescription.doctor_name
+                    }</p>
+                    <p><strong>Date:</strong> ${new Date(
+                      prescription.created_at
+                    ).toLocaleDateString()}</p>
+                    <p><strong>Prescription:</strong> ${
+                      prescription.prescription_text
+                    }</p>
+                  </div>
+                `
               )
               .join("");
           }
         } catch (error) {
           console.error("Error loading dashboard data:", error);
+          document.getElementById("appointments-list").innerHTML =
+            "<p>Error loading appointments.</p>";
+          document.getElementById("prescriptions-list").innerHTML =
+            "<p>Error loading prescriptions.</p>";
         }
       }
 

@@ -21,42 +21,7 @@ A virtual consultation system connecting patients and doctors. Built with PHP, M
 
 ---
 
-## 📁 Project Structure
-```
 
-telemedicine-app/
-│
-├── backend/
-│ ├── config/
-│ │ └── db.php
-│ ├── auth/
-│ │ ├── login.php
-│ │ └── register.php
-│ ├── appointments/
-│ │ ├── create.php
-│ │ ├── respond.php
-│ │ └── view\.php
-│ ├── history/
-│ │ ├── upload.php
-│ │ └── view\.php
-│ ├── middleware/
-│ │ └── auth.php
-│ └── uploads/
-│ └── history/
-│
-├── frontend/
-│ ├── index.html
-│ ├── login.html
-│ ├── register.html
-│ ├── dashboard.html
-│ ├── appointment.html
-│ ├── history.html
-│ └── js/
-│ └── main.js
-
-````
-
----
 
 ## ⚙️ Requirements
 
@@ -76,11 +41,6 @@ git clone https://github.com/your-username/telemedicine-app.git
 cd telemedicine-app
 ````
 
-### 2. Configure the Database
-
-- Import the SQL schema:
-
-```sql
 CREATE DATABASE telemedicine;
 
 USE telemedicine;
@@ -115,7 +75,7 @@ CREATE TABLE medical_history (
 );
 ```
 
-### 3. Configure the Backend
+### 2. Configure the Backend
 
 - Update `backend/config/db.php` with your DB credentials:
 
@@ -126,7 +86,7 @@ $user = 'root';
 $pass = '';
 ```
 
-### 4. Set Up File Permissions
+### 3. Set Up File Permissions
 
 - Ensure the `uploads/history/` folder is writable:
 
@@ -175,31 +135,5 @@ chmod -R 755 backend/uploads/history
 | `/history/upload.php`       | POST   | Patient | Upload medical file                     |
 | `/history/view.php`         | GET    | Doctor  | View and download patient history files |
 
----
-
-## 🚀 Future Improvements
-
-- Admin panel to manage users and appointments.
-- Email notifications for appointment status updates.
-- Video consultation integration via WebRTC.
-- Chat between patient and doctor.
 
 ---
-
-## 🤝 License
-
-MIT License — free to use and modify.
-
----
-
-## 🧑‍💻 Author
-
-Built by Dan-Kingo from Azra 🌍
-Contact: \[[your-email@example.com](mailto:your-email@example.com)]
-
-```
-
----
-
-Let me know if you also want a `.sql` export, sample `.env` file for DB credentials, or if you're deploying online (I'll help configure URL rewrites and security headers).
-```
