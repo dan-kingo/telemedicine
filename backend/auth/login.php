@@ -35,10 +35,11 @@ try {
     $_SESSION['role'] = $user['role'];
 
     // Redirect based on role
-    if ($user['role'] === 'doctor') {
-        header('Location: ../../frontend/doctor/dashboard.html');
-    } else {
+    if ($user['role'] === 'patient') {
         header('Location: ../../frontend/patient/dashboard.html');
+        exit;
+    } else {
+        header('Location: ../../frontend/doctor/dashboard.html');
     }
     exit;
 } catch (PDOException $e) {
