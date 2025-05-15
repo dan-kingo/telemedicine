@@ -25,8 +25,8 @@ try {
         $stmt->execute($appointment_id ? [$user_id, $appointment_id] : [$user_id]);
     } elseif ($role === 'patient') {
         $query = "SELECT p.*, 
-                         d.name AS doctor_name, 
-                         u.name AS patient_name 
+                         d.full_name AS doctor_name, 
+                         u.full_name AS patient_name 
                   FROM prescriptions p
                   JOIN users d ON p.doctor_id = d.id
                   JOIN users u ON p.patient_id = u.id

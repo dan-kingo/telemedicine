@@ -27,7 +27,7 @@ try {
             exit;
         }
 
-        $stmt = $conn->prepare("SELECT id, file_name,  uploaded_at FROM medical_history WHERE patient_id = ? ORDER BY uploaded_at DESC");
+        $stmt = $conn->prepare("SELECT id, file_name, uploaded_at FROM medical_history WHERE patient_id = ? ORDER BY uploaded_at DESC");
         $stmt->execute([$patient_id]);
 
     } else {
@@ -38,7 +38,7 @@ try {
 
     $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Append full download URL
+    // Append full download URL using the stored filename (with timestamp)
     foreach ($files as &$file) {
         $file['download_url'] = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/telemedicine-app/uploads/history/' . $file['file_name'];
     }

@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Check if file and description exist
+// Check if file exists and has a name
 if (!isset($_FILES['file']) || empty($_FILES['file']['name'])) {
     http_response_code(400);
     echo json_encode(['error' => 'No file uploaded']);
@@ -32,10 +32,13 @@ if (!is_dir($targetDir)) {
     mkdir($targetDir, 0777, true);
 }
 
-$filename = basename($file['name']);
-$targetFile = $targetDir . time() . '_' . $filename;
-$fileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
+$originalFilename = basename($file['name']);
 
+// Create saved filename with timestamp prefix to avoid conflicts
+$savedFileName = time() . '_' . $originalFilename;
+$targetFile = $targetDir . $savedFileName;
+
+$fileType = strtolower(pathinfo($savedFileName, PATHINFO_EXTENSION));
 $allowedTypes = ['pdf', 'jpg', 'jpeg', 'png'];
 
 if (!in_array($fileType, $allowedTypes)) {
@@ -44,12 +47,14 @@ if (!in_array($fileType, $allowedTypes)) {
     exit;
 }
 
+// Move uploaded file to target directory
 if (move_uploaded_file($file['tmp_name'], $targetFile)) {
     try {
+        // Insert into database: store savedFileName (with timestamp), not originalFilename
         $stmt = $conn->prepare("INSERT INTO medical_history (patient_id, file_name, file_path, description) VALUES (?, ?, ?, ?)");
         $stmt->execute([
             $patient_id,
-            $filename,
+            $savedFileName,  // this is the key fix: store saved filename here
             $targetFile,
             $description
         ]);
