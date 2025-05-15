@@ -135,7 +135,7 @@
       async function fetchAppointments() {
         const container = document.getElementById("appointments-container");
         try {
-          const res = await fetch("../../backend/history/view.php");
+          const res = await fetch("../../backend/appointments/list.php");
           const data = await res.json();
 
           if (Array.isArray(data) && data.length > 0) {
